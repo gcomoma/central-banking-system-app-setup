@@ -1,5 +1,6 @@
 
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { 
@@ -35,9 +36,11 @@ export function HomePage() {
               Secure, scalable, and comprehensive banking infrastructure for the digital age
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
-              <Button size="lg" variant="secondary" className="text-lg px-8">
-                Access Dashboard
-              </Button>
+              <Link to="/signin">
+                <Button size="lg" variant="secondary" className="text-lg px-8">
+                  Access Dashboard
+                </Button>
+              </Link>
               <Button size="lg" variant="outline" className="text-lg px-8 border-white text-white hover:bg-white hover:text-banking-navy">
                 View Documentation
               </Button>
@@ -241,9 +244,11 @@ export function HomePage() {
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join the future of central banking with our comprehensive platform
           </p>
-          <Button size="lg" variant="secondary" className="text-lg px-8">
-            Get Started Today
-          </Button>
+          <Link to="/signin">
+            <Button size="lg" variant="secondary" className="text-lg px-8">
+              Get Started Today
+            </Button>
+          </Link>
         </div>
       </section>
     </div>

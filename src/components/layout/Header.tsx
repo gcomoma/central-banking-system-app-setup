@@ -32,6 +32,11 @@ export function Header() {
           </nav>
           
           <div className="flex items-center space-x-4">
+            <Link to="/signin">
+              <Button variant="banking" size="sm">
+                Sign In
+              </Button>
+            </Link>
             <Button variant="ghost" size="icon">
               <User className="h-5 w-5" />
             </Button>
