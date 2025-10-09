@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Building2, Eye, EyeOff, Shield, Lock } from 'lucide-react';
 
 export function SignInPage() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -45,8 +46,12 @@ export function SignInPage() {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      // TODO: Implement actual authentication
-      console.log('Sign in attempt:', formData);
+      // For demo purposes, redirect to dashboard on successful "login"
+      if (formData.email === 'admin@centralbank.com' && formData.password === 'admin123456') {
+        navigate('/dashboard');
+      } else {
+        setErrors({ general: 'Invalid email or password' });
+      }
     }, 2000);
   };
 
@@ -83,7 +88,7 @@ export function SignInPage() {
         </div>
 
         {/* Sign In Card */}
-        <Card className="shadow-banking">
+        <Card className="shadow-lg">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Sign In</CardTitle>
             <CardDescription className="text-center">
@@ -92,6 +97,13 @@ export function SignInPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* General Error */}
+              {errors.general && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-sm text-destructive">{errors.general}</p>
+                </div>
+              )}
+
               {/* Email Field */}
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
@@ -162,9 +174,8 @@ export function SignInPage() {
               {/* Sign In Button */}
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-primary hover:bg-primary/90"
                 disabled={isLoading}
-                variant="banking"
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
