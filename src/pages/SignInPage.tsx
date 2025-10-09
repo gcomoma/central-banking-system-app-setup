@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building2, Eye, EyeOff, Shield, Lock } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Building2, Eye, EyeOff, Shield, Lock, AlertCircle } from 'lucide-react';
 
 export function SignInPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -42,6 +44,7 @@ export function SignInPage() {
     if (!validateForm()) return;
     
     setIsLoading(true);
+    setErrors({});
     
     // Simulate API call
     setTimeout(() => {
@@ -50,23 +53,28 @@ export function SignInPage() {
       if (formData.email === 'admin@centralbank.com' && formData.password === 'admin123456') {
         navigate('/dashboard');
       } else {
-        setErrors({ general: 'Invalid email or password' });
+        setErrors({ general: 'Invalid email or password. Please try again.' });
       }
-    }, 2000);
+    }, 1500);
   };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear field error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+    // Clear general error when user modifies form
+    if (errors.general) {
+      setErrors(prev => ({ ...prev, general: '' }));
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Pattern */}
       <div 
-        className="absolute inset-0 opacity-5"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: 'url(https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&h=1080&fit=crop)',
           backgroundSize: 'cover',
@@ -74,55 +82,69 @@ export function SignInPage() {
         }}
       />
       
-      <div className="w-full max-w-md relative z-10">
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+      
+      <div className="w-full max-w-md relative z-10 animate-fade-in">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <Building2 className="h-10 w-10 text-primary" />
+          <Link to="/" className="inline-flex items-center space-x-3 mb-6 group">
+            <div className="p-2 bg-primary rounded-lg group-hover:bg-primary/90 transition-colors">
+              <Building2 className="h-8 w-8 text-primary-foreground" />
+            </div>
             <span className="text-2xl font-bold text-foreground">CentralBank</span>
           </Link>
           <h1 className="text-3xl font-bold text-foreground mb-2">Welcome Back</h1>
           <p className="text-muted-foreground">
-            Sign in to access your banking dashboard
+            Sign in to access your secure banking dashboard
           </p>
         </div>
 
         {/* Sign In Card */}
-        <Card className="shadow-lg">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Sign In</CardTitle>
-            <CardDescription className="text-center">
+        <Card className="banking-card animate-slide-in">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-2xl font-semibold">Sign In</CardTitle>
+            <CardDescription>
               Enter your credentials to access the system
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* General Error */}
               {errors.general && (
-                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <div className="flex items-center space-x-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
                   <p className="text-sm text-destructive">{errors.general}</p>
                 </div>
               )}
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email Address
+                </Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="admin@centralbank.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={errors.email ? 'border-destructive' : ''}
+                  className={`banking-input ${errors.email ? 'border-destructive focus:ring-destructive' : ''}`}
+                  disabled={isLoading}
                 />
                 {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email}</p>
+                  <p className="text-sm text-destructive flex items-center space-x-1">
+                    <AlertCircle className="h-3 w-3" />
+                    <span>{errors.email}</span>
+                  </p>
                 )}
               </div>
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -130,14 +152,16 @@ export function SignInPage() {
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
+                    className={`banking-input pr-10 ${errors.password ? 'border-destructive focus:ring-destructive' : ''}`}
+                    disabled={isLoading}
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -147,25 +171,29 @@ export function SignInPage() {
                   </Button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-destructive">{errors.password}</p>
+                  <p className="text-sm text-destructive flex items-center space-x-1">
+                    <AlertCircle className="h-3 w-3" />
+                    <span>{errors.password}</span>
+                  </p>
                 )}
               </div>
 
               {/* Remember Me & Forgot Password */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id="remember"
-                    className="rounded border-border"
+                    checked={rememberMe}
+                    onCheckedChange={setRememberMe}
+                    disabled={isLoading}
                   />
-                  <Label htmlFor="remember" className="text-sm">
+                  <Label htmlFor="remember" className="text-sm text-muted-foreground">
                     Remember me
                   </Label>
                 </div>
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-primary hover:text-primary/80 transition-colors"
                 >
                   Forgot password?
                 </Link>
@@ -174,16 +202,16 @@ export function SignInPage() {
               {/* Sign In Button */}
               <Button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary/90"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 transition-all duration-200"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                     <span>Signing In...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center justify-center space-x-2">
                     <Lock className="h-4 w-4" />
                     <span>Sign In</span>
                   </div>
@@ -192,9 +220,9 @@ export function SignInPage() {
             </form>
 
             {/* Security Notice */}
-            <div className="mt-6 p-4 bg-muted rounded-lg">
+            <div className="p-4 bg-muted/50 rounded-lg border">
               <div className="flex items-start space-x-3">
-                <Shield className="h-5 w-5 text-primary mt-0.5" />
+                <Shield className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-foreground">
                     Secure Banking Environment
@@ -208,25 +236,25 @@ export function SignInPage() {
             </div>
 
             {/* Demo Credentials */}
-            <div className="mt-4 p-3 bg-accent/10 border border-accent/20 rounded-lg">
+            <div className="p-3 bg-accent/10 border border-accent/20 rounded-lg">
               <p className="text-xs font-medium text-accent mb-2">Demo Credentials:</p>
               <div className="text-xs text-muted-foreground space-y-1">
-                <p>Email: admin@centralbank.com</p>
-                <p>Password: admin123456</p>
+                <p><strong>Email:</strong> admin@centralbank.com</p>
+                <p><strong>Password:</strong> admin123456</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-sm text-muted-foreground">
+        <div className="text-center mt-8 text-sm text-muted-foreground space-y-2">
           <p>
             Need help? Contact{' '}
-            <Link to="/support" className="text-primary hover:underline">
+            <Link to="/support" className="text-primary hover:text-primary/80 transition-colors">
               Technical Support
             </Link>
           </p>
-          <p className="mt-2">
+          <p>
             © 2024 CentralBank. All rights reserved.
           </p>
         </div>
